@@ -79,7 +79,6 @@ async function createToken({ roomName, userId, userName, role, expiresAt }) {
         is_owner: host,
         enable_prejoin_ui: false,
         enable_screenshare: host,
-        ...(host ? { enable_recording: "cloud", start_cloud_recording: true } : {}),
         start_audio_off: !host,
         start_video_off: !host,
         permissions: host
