@@ -1,0 +1,82 @@
+.demo-library { margin-top: 42px; padding: 28px; border: 1px solid #e4c892; border-radius: 20px; background: rgba(255, 249, 232, .93); box-shadow: 0 12px 38px rgba(82, 48, 59, .07); }
+.demo-library-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 22px; }
+.demo-library-heading h2 { margin: 5px 0; color: var(--ink); font: 600 28px/1.2 'Playfair Display', serif; }
+.demo-library-heading p { margin: 0; color: #786e73; font-size: 12px; }
+.demo-upload-form { display: grid; gap: 13px; margin: 0 0 24px; padding: 22px; border: 1px solid #dfc8a4; border-radius: 15px; background: #fffdf7; box-shadow: var(--shadow); }
+.demo-upload-form .form-heading { margin-bottom: 0; }
+.demo-upload-form label, .demo-edit-form label { display: grid; gap: 6px; color: #594d58; font-size: 11px; font-weight: 700; }
+.demo-upload-form input:not([type=file]), .demo-upload-form textarea, .demo-edit-form input, .demo-edit-form textarea { width: 100%; min-height: 42px; padding: 10px 12px; border: 1px solid #e3d9cf; border-radius: 8px; background: white; color: #322933; font: 400 13px 'DM Sans', sans-serif; }
+.demo-upload-form textarea, .demo-edit-form textarea { resize: vertical; }
+.demo-upload-form input[type=file] { width: 100%; padding: 11px; border: 1px dashed #d4b98f; border-radius: 9px; background: #fbf4e5; color: #66575e; font-size: 12px; }
+.demo-upload-help { margin: -5px 0 0; color: #847a7e; font-size: 10px; }
+.demo-local-preview { display: grid; gap: 8px; max-width: 520px; color: #6a5863; font-size: 11px; font-weight: 700; }
+.demo-local-preview video { display: block; width: 100%; max-height: 270px; border-radius: 10px; background: #281f27; }
+.demo-status { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 16px; padding: 11px 13px; border: 1px solid #d4dfca; border-radius: 9px; background: #f0f5e9; color: #4d6945; font-size: 11px; line-height: 1.5; }
+.demo-status svg { flex: 0 0 auto; }
+.demo-library-empty { min-height: 170px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 9px; padding: 25px; border: 1px dashed #dfc996; border-radius: 13px; background: rgba(255,255,255,.54); color: #7d6f76; text-align: center; font-size: 12px; }
+.demo-library-empty svg { color: #a56a56; }
+.demo-library-empty strong { color: var(--ink); font: 600 19px 'Playfair Display', serif; }
+.demo-video-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.demo-video-card { min-width: 0; overflow: hidden; border: 1px solid #eadfcf; border-radius: 13px; background: #fffdfa; box-shadow: 0 5px 18px rgba(53,34,43,.05); }
+.demo-video-frame { position: relative; overflow: hidden; background: #261d25; aspect-ratio: 16 / 9; }
+.demo-video-frame video { display: block; width: 100%; height: 100%; object-fit: contain; }
+.demo-video-badge { position: absolute; top: 12px; left: 12px; display: inline-flex; align-items: center; gap: 5px; padding: 6px 9px; border: 1px solid rgba(255,255,255,.55); border-radius: 999px; background: rgba(255,249,238,.93); color: var(--ink); font-size: 8px; font-weight: 800; letter-spacing: .1em; pointer-events: none; }
+.demo-video-copy { padding: 15px 17px 7px; }
+.demo-video-copy time { color: #9a777b; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.demo-video-copy h3 { margin: 6px 0; color: var(--ink); font: 600 19px/1.25 'Playfair Display', serif; }
+.demo-video-copy p { margin: 0; color: #756c72; font-size: 11px; line-height: 1.65; white-space: pre-wrap; }
+.demo-card-actions { display: flex; align-items: center; gap: 17px; padding: 8px 17px 15px; }
+.demo-card-actions .text-link { font-size: 10px; }
+.demo-card-actions svg { flex: 0 0 auto; }
+.demo-archive-action { margin-left: auto; color: #9b4d4b; }
+.demo-edit-form { display: grid; gap: 13px; padding: 18px; }
+.demo-edit-form .demo-card-actions { padding: 0; }
+
+/* Match the uploaded reference's soft paper panels, painterly hero, and plum/ochre controls. */
+.classroom-main { width: min(1370px, calc(100% - 64px)); padding-top: 24px; }
+.classroom-welcome { position: relative; min-height: 265px; overflow: hidden; isolation: isolate; align-items: center; margin: 0 0 18px; padding: 35px 36px; border: 1px solid rgba(203, 145, 66, .55); border-radius: 24px 24px 8px 8px; background: linear-gradient(90deg, rgba(255,248,226,.98) 0%, rgba(255,248,226,.94) 39%, rgba(255,248,226,.2) 70%, rgba(255,248,226,.02) 100%), url('./hero.svg') center 53% / cover; box-shadow: 0 10px 32px rgba(76,46,54,.06); }
+.classroom-welcome-copy { position: relative; z-index: 2; max-width: 55%; }
+.classroom-welcome h1 { margin: 8px 0 12px; font-family: 'Playfair Display', Georgia, serif; font-size: clamp(38px, 4.5vw, 61px); font-style: italic; line-height: 1.06; letter-spacing: -1.5px; }
+.classroom-welcome p { font: italic 14px/1.6 'Playfair Display', serif; color: #51454d; }
+.classroom-welcome-art { position: absolute; z-index: -1; inset: 0 0 0 43%; opacity: .55; pointer-events: none; }
+.classroom-welcome-art img { width: 100%; height: 100%; object-fit: cover; object-position: 64% 54%; mix-blend-mode: multiply; }
+.classroom-welcome .welcome-stat { align-self: flex-start; margin: 15px 0 0 auto; border-color: rgba(210,141,57,.38); background: rgba(255,250,238,.92); box-shadow: 0 6px 18px rgba(62,38,44,.06); }
+.classroom-tabs { position: relative; z-index: 2; width: fit-content; max-width: 100%; gap: 8px; margin: -63px auto 29px; padding: 7px; border: 1px solid rgba(111,77,91,.12); border-radius: 999px; background: rgba(255,252,243,.94); box-shadow: 0 6px 20px rgba(55,38,46,.08); }
+.classroom-tabs button { gap: 7px; padding: 10px 15px; border: 0; border-radius: 999px; font-size: 11px; }
+.classroom-tabs button.active { border: 0; background: #ead2ee; color: #45243b; box-shadow: inset 0 0 0 1px rgba(94,51,91,.14); }
+.live-schedule-section { padding: 24px 27px 22px; border: 1px solid #e5b65e; border-radius: 19px; background: rgba(255,249,234,.94); box-shadow: 0 9px 28px rgba(79,50,52,.055); scroll-margin-top: 95px; }
+.live-schedule-heading h2, .library-heading h2 { font-family: 'Playfair Display', Georgia, serif; }
+.live-schedule-heading p { font-family: 'Playfair Display', Georgia, serif; font-style: italic; }
+.schedule-empty { border-color: #ead4a6; background: rgba(255,255,255,.45); }
+.library-section { margin-top: 12px; padding: 25px 27px 20px; border: 1px solid #e5b65e; border-radius: 19px; background: rgba(255,249,234,.94); scroll-margin-top: 95px; }
+.library-section .empty-library { border-color: #e6c47e; background: rgba(255,255,255,.45); }
+.library-section .library-help { border: 1px solid #d8b7d8; border-radius: 15px; background: #f5e7f3; }
+.site-shell { background-image: radial-gradient(ellipse at 0% 0%, rgba(238,191,205,.22), transparent 17%), radial-gradient(ellipse at 100% 72%, rgba(195,160,213,.18), transparent 18%); }
+
+@media (max-width: 920px) {
+  .classroom-main { width: min(100% - 36px, 760px); }
+  .classroom-welcome { min-height: 240px; padding: 29px; }
+  .classroom-welcome-copy { max-width: 67%; }
+  .classroom-tabs { margin-top: -48px; }
+  .classroom-tabs button { padding-inline: 11px; }
+}
+@media (max-width: 680px) {
+  .demo-library { margin-top: 29px; padding: 18px 14px; border-radius: 15px; }
+  .demo-library-heading { align-items: flex-start; flex-direction: column; }
+  .demo-library-heading h2 { font-size: 24px; }
+  .demo-video-grid { grid-template-columns: 1fr; gap: 13px; }
+  .demo-upload-form { padding: 16px; }
+  .demo-card-actions { gap: 10px; padding-inline: 13px; }
+  .classroom-main { width: calc(100% - 26px); padding-top: 14px; }
+  .classroom-welcome { min-height: 235px; align-items: flex-start; flex-direction: column; justify-content: center; gap: 0; padding: 25px 19px; border-radius: 18px 18px 6px 6px; background-position: 63% center; }
+  .classroom-welcome-copy { max-width: 78%; }
+  .classroom-welcome h1 { max-width: 330px; font-size: clamp(32px, 9vw, 44px); }
+  .classroom-welcome p { max-width: 250px; font-size: 12px; }
+  .classroom-welcome-art { inset: 0 0 0 22%; opacity: .38; }
+  .classroom-welcome .welcome-stat { display: inline-flex; position: relative; z-index: 2; align-self: flex-start; margin: 5px 0 0; padding: 7px 10px; }
+  .classroom-welcome .welcome-stat-icon { width: 29px; height: 29px; }
+  .signed-nav { justify-content: flex-start; overflow-x: auto; gap: 14px; padding: 4px 3px 7px; scrollbar-width: thin; }
+  .signed-nav button { flex: 0 0 auto; white-space: nowrap; font-size: 10px; }
+  .live-schedule-section { padding: 19px 14px; border-radius: 15px; }
+  .library-section { padding: 21px 14px 15px; border-radius: 15px; }
+}

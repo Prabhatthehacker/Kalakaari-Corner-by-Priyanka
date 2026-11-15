@@ -1,0 +1,190 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "config": {
+      "teacherEmail": {
+        ".read": "auth != null"
+      }
+    },
+    "recordings": {
+      ".read": "auth != null",
+      "$id": {
+        ".validate": "newData.hasChildren(['title', 'category', 'videoUrl', 'createdAt', 'createdBy'])",
+        "title": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 140"
+        },
+        "category": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
+        },
+        "description": {
+          ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 2000"
+        },
+        "videoUrl": {
+          ".validate": "newData.isString() && newData.val().matches(/^https:\\/\\/.{4,990}$/)"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "createdBy": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        },
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.email === root.child('config/teacherEmail').val()"
+      }
+    },
+    "demoVideos": {
+      ".read": "auth != null",
+      "$id": {
+        ".validate": "newData.hasChildren(['title', 'videoUrl', 'status', 'createdAt', 'updatedAt', 'createdBy'])",
+        "title": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 140"
+        },
+        "description": {
+          ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 2000"
+        },
+        "videoUrl": {
+          ".validate": "newData.isString() && newData.val().matches(/^https:\\/\\/.{4,990}$/)"
+        },
+        "status": {
+          ".validate": "newData.val() === 'published' || newData.val() === 'archived'"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "updatedAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "createdBy": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        },
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.email === root.child('config/teacherEmail').val()"
+      }
+    },
+    "messages": {
+      ".read": "auth != null",
+      ".indexOn": [
+        "createdAt"
+      ],
+      "$id": {
+        ".validate": "newData.hasChildren(['senderUid', 'senderName', 'body', 'createdAt'])",
+        "senderUid": {
+          ".validate": "newData.val() === auth.uid"
+        },
+        "senderName": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 160"
+        },
+        "body": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 1000"
+        },
+        "createdAt": {
+          ".validate": "newData.val() === now"
+        },
+        "$other": {
+          ".validate": false
+        },
+        ".write": "auth != null && ((!data.exists() && newData.exists() && newData.child('senderUid').val() === auth.uid) || (data.exists() && !newData.exists() && auth != null && auth.token.email_verified === true && auth.token.email === root.child('config/teacherEmail').val()))"
+      }
+    },
+    "liveClasses": {
+      ".read": "auth != null",
+      "$id": {
+        ".validate": "newData.hasChildren(['title', 'startAt', 'durationMinutes', 'status', 'hostUid', 'createdAt'])",
+        "title": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 160"
+        },
+        "notes": {
+          ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 1000"
+        },
+        "startAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "durationMinutes": {
+          ".validate": "newData.isNumber() && newData.val() >= 15 && newData.val() <= 240"
+        },
+        "status": {
+          ".validate": "newData.val() === 'scheduled' || newData.val() === 'live' || newData.val() === 'ended'"
+        },
+        "hostUid": {
+          ".validate": "newData.isString()"
+        },
+        "dailyRoomName": {
+          ".validate": "newData.isString()"
+        },
+        "dailyRoomUrl": {
+          ".validate": "newData.isString()"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        },
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.email === root.child('config/teacherEmail').val()"
+      }
+    },
+    "liveClassMessages": {
+      "$classId": {
+        ".read": "auth != null",
+        ".indexOn": [
+          "createdAt"
+        ],
+        "$id": {
+          ".validate": "newData.hasChildren(['senderUid', 'senderName', 'body', 'createdAt'])",
+          "senderUid": {
+            ".validate": "newData.val() === auth.uid"
+          },
+          "senderName": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 160"
+          },
+          "body": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 1000"
+          },
+          "createdAt": {
+            ".validate": "newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          },
+          ".write": "auth != null && !data.exists() && newData.child('senderUid').val() === auth.uid && root.child('liveClasses').child($classId).child('status').val() === 'live'"
+        }
+      }
+    },
+    "speakRequests": {
+      "$classId": {
+        ".read": "auth != null && auth.token.email_verified === true && auth.token.email === root.child('config/teacherEmail').val()",
+        "$uid": {
+          ".validate": "newData.hasChildren(['id', 'studentName', 'status', 'createdAt', 'updatedAt'])",
+          "id": {
+            ".validate": "newData.isNumber()"
+          },
+          "studentName": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 160"
+          },
+          "status": {
+            ".validate": "newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'declined' || newData.val() === 'revoked'"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          },
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "(auth != null && auth.token.email_verified === true && auth.token.email === root.child('config/teacherEmail').val()) || (auth != null && auth.uid === $uid && ((newData.child('status').val() === 'pending' && (!data.exists() || data.child('status').val() === 'declined' || data.child('status').val() === 'revoked') && root.child('liveClasses').child($classId).child('status').val() === 'live') || (data.child('status').val() === 'approved' && newData.child('status').val() === 'revoked')))"
+        }
+      }
+    },
+    "classRecordings": {
+      ".read": "auth != null"
+    }
+  }
+}
