@@ -178,8 +178,38 @@ function DemoLesson({ step, setStep }: { step: number; setStep: (value: number) 
   );
 }
 
+async function saveVideoFile(url: string, title: string) {
+  const extension = (new URL(url).pathname.match(/\.(mp4|webm|ogg|mov)$/i)?.[1] ?? "mp4").toLowerCase();
+  const name = `${title.replace(/[^\p{L}\p{N} _-]+/gu, "").trim().slice(0, 80) || "kalakaari-class"}.${extension}`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("The video could not be downloaded.");
+  const objectUrl = URL.createObjectURL(await response.blob());
+  const link = document.createElement("a");
+  link.href = objectUrl;
+  link.download = name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000);
+}
+
 function RecordingPlayer({ lesson, close }: { lesson: Lesson; close: () => void }) {
   const source = videoDetails(lesson.videoUrl);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadNote, setDownloadNote] = useState("");
+  async function download() {
+    setDownloading(true);
+    setDownloadNote("");
+    try {
+      await saveVideoFile(lesson.videoUrl, lesson.title);
+    } catch {
+      // Some hosts don't allow a direct save from the page; open the file so it can still be saved.
+      window.open(lesson.videoUrl, "_blank", "noopener,noreferrer");
+      setDownloadNote("Your browser couldn’t save it directly, so the video opened in a new tab. Press and hold it (or use the ⋮ menu) to save.");
+    } finally {
+      setDownloading(false);
+    }
+  }
   return (
     <div className="modal-scrim" role="presentation" onMouseDown={event => event.target === event.currentTarget && close()}>
       <section className="video-modal" role="dialog" aria-modal="true" aria-labelledby="video-title">
@@ -200,70 +230,14 @@ function RecordingPlayer({ lesson, close }: { lesson: Lesson; close: () => void 
             </div>
           )}
         </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, margin: "12px 0 4px" }}>
+          {source.kind === "video" && <button className="button button-ochre" type="button" onClick={() => void download()} disabled={downloading}>{downloading ? "Downloading…" : "Download video"}</button>}
+          <a className="button button-paper" href={`https://wa.me/?text=${encodeURIComponent(`Kalakaari Corner class recording: ${lesson.title}\n${lesson.videoUrl}`)}`} target="_blank" rel="noreferrer">Share on WhatsApp</a>
+        </div>
+        {downloadNote && <p className="inline-error" role="status">{downloadNote}</p>}
         <p className="modal-footnote">Shared by Priyanka · {lesson.category}{lesson.description ? ` · ${lesson.description}` : ""}</p>
       </section>
     </div>
-  );
-}
-
-type ClassRecording = { id: string; classId: number; title: string; startedAt: Date; durationSeconds: number };
-
-function formatDuration(seconds: number) {
-  const minutes = Math.max(1, Math.round(seconds / 60));
-  return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : `${minutes} min`;
-}
-
-function ClassRecordingPlayer({ title, url, close }: { title: string; url: string; close: () => void }) {
-  return (
-    <div className="modal-scrim" role="presentation" onMouseDown={event => event.target === event.currentTarget && close()}>
-      <section className="video-modal" role="dialog" aria-modal="true" aria-label={title}>
-        <div className="video-modal-top">
-          <div><span className="eyebrow">CLASS REPLAY</span><h2>{title}</h2></div>
-          <button className="icon-button" type="button" onClick={close} aria-label="Close video"><X size={19} /></button>
-        </div>
-        <div className="video-frame"><video src={url} controls playsInline autoPlay /></div>
-        <p className="modal-footnote">Recorded live with Priyanka</p>
-      </section>
-    </div>
-  );
-}
-
-function ClassRecordingCard({ rec, onWatch }: { rec: ClassRecording; onWatch: (value: { title: string; url: string }) => void }) {
-  const getLink = trpc.classroom.recordingDownloadLink.useMutation();
-  const [error, setError] = useState("");
-
-  // Browsers block popups opened after a wait, so open the window first and fill it in afterwards.
-  function withLink(validForSecs: number, then: (url: string, win: Window | null) => void, blank = true) {
-    setError("");
-    const win = blank ? window.open("", "_blank") : null;
-    getLink.mutate({ recordingId: rec.id, validForSecs }, {
-      onSuccess: (result: { url: string }) => then(result.url, win),
-      onError: (e: Error) => { win?.close(); setError(e.message); },
-    });
-  }
-  const download = () => withLink(3600, (url, win) => { if (win) win.location.href = url; else window.location.assign(url); });
-  const whatsapp = () => withLink(86400, (url, win) => {
-    const text = `Kalakaari Corner class recording: ${rec.title}\n${url}\n(Link works for 24 hours.)`;
-    const target = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    if (win) win.location.href = target; else window.location.assign(target);
-  });
-  const watch = () => withLink(3600, url => onWatch({ title: rec.title, url }), false);
-  const busy = getLink.isPending;
-
-  return (
-    <article className="recording-card" style={{ cursor: "default" }}>
-      <span className="recording-cover"><img src={HERO_ART} alt="" /><span className="recording-type"><Video size={13} /> LIVE CLASS</span></span>
-      <span className="recording-info">
-        <span className="recording-category">{new Date(rec.startedAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })} · {formatDuration(rec.durationSeconds)}</span>
-        <strong>{rec.title}</strong>
-        <span style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
-          <button className="button button-ink" type="button" onClick={watch} disabled={busy}><Play size={14} /> Watch</button>
-          <button className="button button-ochre" type="button" onClick={download} disabled={busy}>Download</button>
-          <button className="button button-paper" type="button" onClick={whatsapp} disabled={busy}>WhatsApp</button>
-        </span>
-        {error && <span className="inline-error" role="alert" style={{ marginTop: 8 }}>{error}</span>}
-      </span>
-    </article>
   );
 }
 
@@ -304,9 +278,9 @@ function RecordingForm({
       <label>What students will learn<textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Add a short description of the class…" maxLength={2000} rows={2} /></label>
       <div className="form-row">
         <label>Topic<input value={category} onChange={e => setCategory(e.target.value)} placeholder="Watercolour" maxLength={60} /></label>
-        <label>Video link<input type="url" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder="https://…" required /></label>
+        <label>Video link<input type="url" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder="https://files.catbox.moe/…mp4" required /></label>
       </div>
-      <p className="form-help">Paste a hosted YouTube, Vimeo, or direct MP4/webm link. Video files are not uploaded here.</p>
+      <p className="form-help">Upload the video to catbox.moe first, then paste its direct link here (it looks like https://files.catbox.moe/abc123.mp4). YouTube and Vimeo links work too.</p>
       {error && <p className="inline-error" role="alert">{error}</p>}
       <button className="button button-ink" type="submit" disabled={pending}>{pending ? "Saving…" : "Add to my classes"} {!pending && <ArrowRight size={16} />}</button>
     </form>
@@ -374,7 +348,6 @@ export default function Home() {
   const [showRecordingForm, setShowRecordingForm] = useState(false);
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
-  const [watching, setWatching] = useState<{ title: string; url: string } | null>(null);
   const [draft, setDraft] = useState("");
   const [loginError, setLoginError] = useState("");
   const [successNote, setSuccessNote] = useState("");
@@ -407,15 +380,6 @@ export default function Home() {
   const startLiveClass = trpc.classroom.startLiveClass.useMutation({
     onSuccess: async () => { await liveClassesQuery.refetch(); },
   });
-  const classRecordingsQuery = trpc.classroom.classRecordings.useQuery(undefined, { enabled: isAuthenticated && view === "recordings" });
-  const syncRecordings = trpc.classroom.syncRecordings.useMutation({
-    onSuccess: async () => { await utils.classroom.classRecordings.invalidate(); },
-  });
-  const syncRecordingsNow = syncRecordings.mutate;
-  useEffect(() => {
-    if (isAuthenticated && view === "recordings") syncRecordingsNow(undefined);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, view]);
 
   function openClass(id: number) {
     window.location.hash = `/class/${id}`;
@@ -550,20 +514,12 @@ export default function Home() {
           )}
           {view === "recordings" && (
             <section className="library-section" id="recordings">
-              <div className="library-heading"><div><span className="eyebrow">YOUR ON-DEMAND STUDIO</span><h2>Class recordings</h2><p>Live classes are recorded automatically. Watch, download, or share on WhatsApp.</p></div>
-                {isTeacher && <button className="button button-ink" type="button" onClick={() => setShowRecordingForm(value => !value)}><Plus size={17} /> Add a recording link</button>}
+              <div className="library-heading"><div><span className="eyebrow">YOUR ON-DEMAND STUDIO</span><h2>Recordings</h2><p>Watch a class again, download it, or share it on WhatsApp.</p></div>
+                {isTeacher && <button className="button button-ink" type="button" onClick={() => setShowRecordingForm(value => !value)}><Plus size={17} /> Add a recording</button>}
               </div>
               {successNote && <p className="success-note"><Check size={16} /> {successNote}</p>}
               {showRecordingForm && isTeacher && <RecordingForm onSave={saveRecording} pending={addRecording.isPending} onCancel={() => setShowRecordingForm(false)} />}
 
-              <h3 style={{ margin: "18px 0 10px" }}>From live classes</h3>
-              {classRecordingsQuery.isLoading || syncRecordings.isPending && !classRecordingsQuery.data?.length ? <div className="library-loading">Looking for new recordings…</div> : classRecordingsQuery.data?.length ? (
-                <div className="recording-grid">{classRecordingsQuery.data.map((rec: ClassRecording) => <ClassRecordingCard key={rec.id} rec={rec} onWatch={setWatching} />)}</div>
-              ) : (
-                <div className="empty-library"><span className="empty-spark"><Video size={21} /></span><h3>No class recordings yet.</h3><p>After Priyanka teaches a live class, its recording appears here automatically (it can take a few minutes to process).</p></div>
-              )}
-
-              <h3 style={{ margin: "26px 0 10px" }}>Shared links</h3>
               {recordingsQuery.isLoading ? <div className="library-loading">Gathering your classes…</div> : recordingsQuery.isError ? (
                 <div className="empty-library"><span className="empty-spark"><BookOpen size={21} /></span><h3>Your class library is getting ready.</h3><p>Please refresh in a moment. If the issue continues, ask Priyanka for help.</p><button className="text-link" type="button" onClick={() => void recordingsQuery.refetch()}>Try again <ArrowRight size={15} /></button></div>
               ) : recordingsQuery.data?.length ? (
@@ -572,7 +528,7 @@ export default function Home() {
                   <span className="recording-info"><span className="recording-category">{lesson.category}</span><strong>{lesson.title}</strong><span className="recording-description">{lesson.description || "A replay from Priyanka’s art studio."}</span><span className="recording-meta"><Clock3 size={14} /> {new Date(lesson.createdAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })} <ChevronRight size={14} /></span></span>
                 </button>)}</div>
               ) : (
-                <div className="empty-library"><span className="empty-spark"><BookOpen size={21} /></span><h3>{isTeacher ? "Add a hosted video link here." : "No shared links yet."}</h3><p>{isTeacher ? "YouTube, Vimeo, or direct video links appear in your students’ library." : "Priyanka can add extra lesson videos here."}</p></div>
+                <div className="empty-library"><span className="empty-spark"><BookOpen size={21} /></span><h3>{isTeacher ? "Your first recording goes here." : "Your recordings are on their way."}</h3><p>{isTeacher ? "Upload a class video to catbox.moe, then add its link and it appears in your students’ library." : "Priyanka will add class recordings here."}</p></div>
               )}
               <div className="library-help"><span className="help-petal">✳</span><p><strong>Take it at your pace.</strong> Replay a lesson whenever you want a fresh look at a technique.</p><button type="button" className="text-link" onClick={() => changeView("chat")}>Ask Priyanka a question <ArrowRight size={15} /></button></div>
             </section>
@@ -590,7 +546,6 @@ export default function Home() {
           />}
         </main>
       )}
-      {watching && <ClassRecordingPlayer title={watching.title} url={watching.url} close={() => setWatching(null)} />}
       {activeLesson && <RecordingPlayer lesson={activeLesson} close={() => setActiveLesson(null)} />}
     </div>
   );
